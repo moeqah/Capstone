@@ -1,219 +1,137 @@
 package com.littlelemon.littlelemonapp
 
-import android.content.Context
-import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.littlelemon.littlelemonapp.ui.theme.Home
-import com.littlelemon.littlelemonapp.ui.theme.Onboarding
+import com.littlelemon.littlelemonapp.ui.theme.LittleLemonColor
 
 
 @Composable
-fun OnBoarding(context: Context ,NavHostController: NavHostController) {
-    var isvalid: Boolean
-    var isFirstNameValid by remember { mutableStateOf(true) }
-    var isLastNameValid by remember { mutableStateOf(true) }
-    var isEmailValid by remember { mutableStateOf(true) }
-    val sharedPreferences = context.getSharedPreferences("order_preferences", ComponentActivity.MODE_PRIVATE)
+fun OnBoarding(navController : NavHostController, savePreferencesFun : (firstName : String, lastName : String, email : String) -> Unit) {
+    var firstName by remember {
+        mutableStateOf(TextFieldValue(""))
+    }
+    var lastName by remember {
+        mutableStateOf(TextFieldValue(""))
+    }
+    var email by remember {
+        mutableStateOf(TextFieldValue(""))
+    }
 
+    var errorMessage by remember {
+        mutableStateOf("")
+    }
+
+    val inputFieldColors = TextFieldDefaults.textFieldColors(
+        backgroundColor = LittleLemonColor.white,
+        cursorColor = LittleLemonColor.yellow,
+        focusedIndicatorColor = LittleLemonColor.yellow,
+        unfocusedIndicatorColor = LittleLemonColor.darkGrayGreen,
+        focusedLabelColor = LittleLemonColor.darkGrayGreen,
+        unfocusedLabelColor = LittleLemonColor.darkGrayGreen
+    )
+
+    fun tryRegister() {
+        if (firstName.text == "" || lastName.text == "" || email.text == "") {
+            errorMessage = "Registration unsuccessful. Please fill in all fields"
+        } else {
+            savePreferencesFun(firstName.text, lastName.text, email.text)
+            navController.navigate(Home.route)
+        }
+    }
 
     Column(
-        modifier = Modifier.background(Color.White)
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            contentDescription="Little Lemon Logo",
+            contentScale = ContentScale.FillHeight,
+            modifier = Modifier
+                .width(200.dp)
+                .height(50.dp)
+                .padding(8.dp)
+        )
+        Text(
+            text ="Let's get to know you",
+            textAlign = TextAlign.Center,
+            color = LittleLemonColor.white,
+            style = MaterialTheme.typography.h2,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp)
-                .background(Color.White),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Little lemon logo",
-                modifier = Modifier
-                    .fillMaxWidth(.50f)
-                    .align(Alignment.Center)
-                    .fillMaxSize()
-            )
-        }
+                .background(LittleLemonColor.lightGrayGreen)
+                .padding(top = 24.dp, bottom = 24.dp)
+        )
         Column(
+            verticalArrangement = Arrangement.spacedBy(32.dp),
             modifier = Modifier
-                .background(Color(0xFF495E57))
+                .padding(16.dp)
         ) {
             Text(
-                text = "Let's get to know you",
+                text = "Personal Information",
+                style = MaterialTheme.typography.h3,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(50.dp),
-                textAlign = TextAlign.Center,
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-
-                )
             )
-        }
-        Column(
-            modifier = Modifier
-                .background(Color.White)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
-        ) {
-            Text(
-                text = "Personal information",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 10.dp, top = 40.dp, bottom = 40.dp),
-
-                style = TextStyle(
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-
-                ),
-
-                )
-            var firstName by remember { mutableStateOf("") }
-
             TextField(
                 value = firstName,
-                onValueChange = { newFirstName
-                    ->
-                    firstName = newFirstName
-                    isFirstNameValid = firstName.isNotBlank()
-                },
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = if (isFirstNameValid) Color.Transparent else Color.Red,
-                    unfocusedIndicatorColor = if (isFirstNameValid) Color.Transparent else Color.Red
-                ),
+                onValueChange = { firstName = it},
+                label = {Text("First Name")},
+                colors = inputFieldColors,
+                singleLine = true,
                 modifier = Modifier
-                    .background(Color.White)
                     .fillMaxWidth()
-                    .padding(start = 10.dp, end = 10.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                ,
-                label = { Text("First name") },
-
-                )
-
-            var lastName by remember { mutableStateOf("") }
-
+            )
             TextField(
                 value = lastName,
-                onValueChange = { newlastName
-                    ->
-                    lastName = newlastName
-                    isLastNameValid = lastName.isNotBlank()
-                },
+                onValueChange = { lastName = it},
+                label = {Text("Last Name")},
+                colors = inputFieldColors,
+                singleLine = true,
                 modifier = Modifier
-                    .background(Color.White)
                     .fillMaxWidth()
-                    .padding(start = 10.dp, top = 50.dp, end = 10.dp)
-                    .clip(RoundedCornerShape(10.dp)),
-                label = { Text("Last name") },
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = if (isLastNameValid) Color.Transparent else Color.Red,
-                    unfocusedIndicatorColor = if (isLastNameValid) Color.Transparent else Color.Red
-                )
             )
-
-            var email by remember { mutableStateOf("") }
-
             TextField(
                 value = email,
-                onValueChange = { newEmail
-                    ->
-                    email = newEmail
-                    isEmailValid = email.isNotBlank() && email.contains("@")
-                },
+                onValueChange = { email = it},
+                label = {Text("Email")},
+                colors = inputFieldColors,
+                singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 10.dp, top = 50.dp, end = 10.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.White),
-                label = { Text("Email") },
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = if (isEmailValid) Color.Transparent else Color.Red,
-                    unfocusedIndicatorColor = if (isEmailValid) Color.Transparent else Color.Red
-                )
             )
-            Button(
-                onClick = {
-                    isvalid = when {
-                        firstName.isBlank() -> false
-                        lastName.isBlank() -> false
-                        email.isBlank() -> false
-                        else -> true
-                    }
-                    if (isvalid) {
-                        NavHostController.navigate(Home.route) {
-                            popUpTo(Onboarding.route) { inclusive = true }
-                            launchSingleTop = true
-                        }
-                        sharedPreferences.edit()
-                            .putString("firstName", firstName)
-                            .putString("lastName", lastName)
-                            .putString("email", email)
-                            .putBoolean("userRegistered", true)
-                            .apply()
-
-                        Toast.makeText(
-                            context, "Registration successful.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        Toast.makeText(
-                            context, "Registration unsuccessful. Please enter all data.",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                        isvalid = false
-                    }
-
-
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 10.dp, end = 10.dp, top = 135.dp, bottom = 10.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFF4CE14)),
-                colors = ButtonDefaults.buttonColors(Color(0xFFF4CE14)),
-
+            Column() {
+                Button(
+                    onClick = { tryRegister() },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = LittleLemonColor.yellow),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 32.dp)
                 ) {
+                    Text(
+                        text = "Register",
+                        style = MaterialTheme.typography.button
+                    )
+                }
                 Text(
-                    text = "Register",
-                    color = Color(0xFF333333),
-                    fontSize = 18.sp,
-
+                    text = errorMessage,
+                    color = LittleLemonColor.error,
+                    fontSize = 12.sp
                 )
             }
         }
     }
+
 }
