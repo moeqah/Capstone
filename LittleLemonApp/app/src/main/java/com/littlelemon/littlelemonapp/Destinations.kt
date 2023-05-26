@@ -1,18 +1,18 @@
-package com.littlelemon.littlelemonapp.ui.theme
+package com.littlelemon.littlelemonapp
 
 interface Destinations{
     val route: String
 }
 
-object Home: Destinations{
+object Home: Destinations {
     override val route = "Home"
 }
 
-object Onboarding: Destinations{
+object Onboarding: Destinations {
     override val route = "Onboarding"
 }
 
-object Profile: Destinations{
+object Profile: Destinations {
     override val route = "Profile"
 
 }
